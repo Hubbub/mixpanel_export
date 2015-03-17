@@ -1,14 +1,15 @@
 #!/usr/bin/env ruby
+require 'mixpanel_client'
+require 'csv'
 
 if ARGV.size < 1 
   puts ""
-  puts "Usage: mixpanel_export.rb output_file from_date to_date [event_name]"
+  puts "Usage: mixpanel_export.rb from_date to_date [event_name]"
   puts "  (dates in yyyy-mm-dd format)"
 else
-  output_file = ARGV[0]
-  from_date = ARGV[1]
-  to_date = ARGV[2]
-  event =  ARGV[3]
+  from_date = ARGV[0]
+  to_date = ARGV[1]
+  event =  ARGV[2]
 
   client = Mixpanel::Client.new(
     :api_key => ENV['API_KEY'], 
@@ -21,7 +22,7 @@ else
 
   data = client.request('export', params)
 
-  CSV.open(output_file, 'w') do |csv|
+  CSV do |csv|
     headers = []
     properties = []
 
@@ -44,6 +45,4 @@ else
       csv << row
     end
   end
-
-  puts "Data written to #{output_file}"
 end

@@ -2,7 +2,7 @@
 require 'mixpanel_client'
 require 'csv'
 
-if ARGV.size < 1 
+if ARGV.size < 1
   puts ""
   puts "Usage: mixpanel_export.rb from_date to_date [event_name]"
   puts "  (dates in yyyy-mm-dd format)"
@@ -12,7 +12,7 @@ else
   event =  ARGV[2]
 
   client = Mixpanel::Client.new(
-    :api_key => ENV['API_KEY'], 
+    :api_key => ENV['API_KEY'],
     :api_secret => ENV['API_SECRET']
   )
 

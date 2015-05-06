@@ -22,25 +22,32 @@ else
 
   data = client.request('export', params)
 
+  headers = []
+  properties = []
+
+  # Do one loop to find all possible headers that we need
+  data.each do |datum|
+    datum.keys.each do |key|
+      headers << key unless headers.include?(key)
+    end
+    row_props = datum.fetch('properties', {}).keys
+    row_props.each do |key|
+      properties << key unless properties.include?(key)
+    end
+  end
+
+  # Now actually export the data
   CSV do |csv|
-    headers = []
-    properties = []
+    csv << headers + properties
 
     data.each do |datum|
-      if headers.empty?
-        headers = datum.keys
-        properties = datum.fetch('properties', {}).keys
-        csv << (headers + properties)
-      end
-
       row = []
       headers.each do |header|
         row << datum[header]
       end
-
       event_props = datum.fetch('properties', {})
 
-      if event_props["$email"].to_s.length == 0 && event_props["distinct_id"].to_s.length > 0
+      if headers.include?("$email") && event_props["$email"].to_s.length == 0 && event_props["distinct_id"].to_s.length > 0
         # Look up user details
         user_params = { :distinct_id => event_props["distinct_id"] }
         user_data = client.request('engage', user_params)

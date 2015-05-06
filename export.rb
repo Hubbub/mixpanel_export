@@ -33,14 +33,26 @@ else
         csv << (headers + properties)
       end
 
-
       row = []
       headers.each do |header|
         row << datum[header]
       end
 
+      event_props = datum.fetch('properties', {})
+
+      if event_props["$email"].to_s.length == 0 && event_props["distinct_id"].to_s.length > 0
+        # Look up user details
+        user_params = { :distinct_id => event_props["distinct_id"] }
+        user_data = client.request('engage', user_params)
+        begin
+          event_props["$email"] = user_data["results"].first["$properties"]["$email"]
+        rescue => e
+          # Oh well...
+        end
+      end
+
       properties.each do |property|
-        row << datum.fetch('properties', {})[property]
+        row << event_props[property]
       end
       csv << row
     end
